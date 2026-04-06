@@ -95,7 +95,7 @@ function mockWallets(address, realHolders) {
   });
 }
 
-async function fetchTye(sd, apiBase) {
+async function fetchTye(sd) {
   const sec = sd.security || {};
   const mkt = sd.market || {};
   const fl  = sec.flags || {};
@@ -380,11 +380,7 @@ function ScanningScreen({ address, stage, iqEarned, mode }) {
 }
 
 /* ── MODE SELECT ── */
-function ModeSelect({ onSelect, apiBase, setApiBase }) {
-  const [showSetup, setShowSetup] = useState(false);
-  const [urlInput, setUrlInput]   = useState(apiBase);
-  const hasBackend = apiBase && apiBase !== "http://localhost:3001" && apiBase.startsWith("http");
-
+function ModeSelect({ onSelect }) {
   return (
     <div style={{ minHeight: "100vh", background: "#0e0904", display: "flex", flexDirection: "column", alignItems: "center", fontFamily: "system-ui, sans-serif", padding: "24px 16px 48px", overflowY: "auto" }}>
       <style>{".ms-tap{transition:transform .2s ease,box-shadow .2s ease} .ms-tap:active{transform:scale(0.98)}"}</style>
@@ -400,61 +396,6 @@ function ModeSelect({ onSelect, apiBase, setApiBase }) {
       </div>
 
       <div style={{ width: "100%", maxWidth: 420, display: "flex", flexDirection: "column", gap: 14 }}>
-
-        {/* Backend status */}
-        <div className="ms-tap" onClick={() => setShowSetup((s) => !s)} style={{ background: hasBackend ? "rgba(34,197,94,0.07)" : "rgba(245,158,11,0.05)", border: "1px solid " + (hasBackend ? "rgba(34,197,94,0.22)" : "rgba(245,158,11,0.18)"), borderRadius: 12, padding: "12px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 20 }}>{hasBackend ? "🟢" : "🟡"}</span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: hasBackend ? "#22c55e" : "#f59e0b", marginBottom: 2 }}>
-              {hasBackend ? "Backend connected — live data active" : "Backend not set — tap to configure"}
-            </div>
-            <div style={{ fontSize: 10, color: hasBackend ? "rgba(34,197,94,0.6)" : "#5a3e1c", wordBreak: "break-all" }}>{hasBackend ? apiBase : "Set your Replit URL for live data"}</div>
-          </div>
-          <span style={{ fontSize: 14, color: hasBackend ? "rgba(34,197,94,0.5)" : "#6b4f25" }}>{showSetup ? "▲" : "▼"}</span>
-        </div>
-
-        {/* Setup panel */}
-        {showSetup && (
-          <div style={{ background: "#1a1208", border: "1px solid rgba(245,158,11,0.20)", borderRadius: 12, padding: "16px", display: "flex", flexDirection: "column", gap: 14 }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: TA.text, borderBottom: "1px solid " + TA.border, paddingBottom: 10 }}>Setup Live Data — iPhone Guide</div>
-
-            {[
-              { n: 1, t: "Create a free Replit account", b: "Open Safari, go to replit.com, tap Sign Up, use Continue with Apple for easiest login." },
-              { n: 2, t: "Create a Node.js project",     b: 'Tap the chat box and type: "Create a simple Node.js Express API server". Let the agent build it.' },
-              { n: 3, t: "Replace the server code",      b: "In the agent chat, paste the full contents of the server.js file from this conversation. Ask it to replace the existing code." },
-              { n: 4, t: "Get your live URL",             b: "Ask the agent: Run the server and give me the public URL. Copy the URL it shows you." },
-              { n: 5, t: "Paste your URL below",          b: "Copy that URL, paste it in the field below, and tap Save." },
-            ].map(({ n, t, b }) => (
-              <div key={n} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                <div style={{ width: 22, height: 22, borderRadius: "50%", background: "linear-gradient(135deg,#92400e,#d97706)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 900, color: "#fff", flexShrink: 0, marginTop: 1 }}>{n}</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: TA.text, marginBottom: 3 }}>{t}</div>
-                  <div style={{ fontSize: 11, color: TA.muted, lineHeight: 1.6 }}>{b}</div>
-                </div>
-              </div>
-            ))}
-
-            <div style={{ borderTop: "1px solid " + TA.border, paddingTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-              <div style={{ fontSize: 11, color: TA.sub, fontWeight: 600 }}>Your Replit backend URL:</div>
-              <input
-                value={urlInput}
-                onChange={(e) => setUrlInput(e.target.value)}
-                placeholder="https://your-project.replit.dev"
-                inputMode="url"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck={false}
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid " + TA.border, borderRadius: 8, padding: "10px 12px", fontSize: 12, color: TA.text, outline: "none", fontFamily: "monospace", WebkitAppearance: "none" }}
-              />
-              <button
-                onClick={() => { setApiBase(urlInput.trim().replace(/\/$/, "")); setShowSetup(false); }}
-                style={{ padding: 11, borderRadius: 8, border: "none", background: "linear-gradient(135deg,#92400e,#f59e0b)", color: "#fff8e7", fontWeight: 800, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}
-              >
-                Save Backend URL
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Training Arc card */}
         <div className="ms-tap" onClick={() => onSelect("training")} style={{ borderRadius: 16, overflow: "hidden", cursor: "pointer", background: "linear-gradient(150deg,#2a1f0e,#1e1508,#19130a)", border: "1px solid rgba(245,158,11,0.18)", boxShadow: "0 6px 24px rgba(0,0,0,0.55)" }}>
@@ -826,8 +767,6 @@ function SageModeView({ sd, wallets }) {
 /* ── MAIN APP ── */
 export default function App() {
   const [screen,     setScreen]     = useState("select");
-  // API_BASE not needed — backend is built into Vercel at /api/scan/
-  const [apiBase,    setApiBase]    = useState("/");
   const [addr,       setAddr]       = useState("");
   const [scanning,   setScanning]   = useState(false);
   const [scanStage,  setScanStage]  = useState(0);
@@ -878,7 +817,7 @@ export default function App() {
       setScanning(false);
       if (isT) {
         setTyeLoading(true);
-        fetchTye(data, apiBase)
+        fetchTye(data)
           .then(setTye)
           .catch(() => setTye(null))
           .finally(() => setTyeLoading(false));
@@ -887,10 +826,10 @@ export default function App() {
       setScanning(false);
       setError(err.message === "timeout" ? "Scan timed out. Is your Replit backend running?" : "Backend error: " + err.message);
     }
-  }, [addr, isT, apiBase]);
+  }, [addr, isT]);
 
   if (screen === "select") {
-    return <ModeSelect onSelect={(m) => setScreen(m)} apiBase={apiBase} setApiBase={setApiBase} />;
+    return <ModeSelect onSelect={(m) => setScreen(m)} />;
   }
 
   const bg     = isT ? TA.bg  : SM.bg;
