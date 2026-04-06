@@ -827,9 +827,9 @@ export default function App() {
       }
     } catch (err) {
       setScanning(false);
-      setError(err.message === "timeout" ? "Scan timed out. Is your Replit backend running?" : "Backend error: " + err.message);
+      setError(err.message === "timeout" ? "Scan timed out — please try again." : "Scan error: " + err.message);
     }
-  }, [addr, isT, apiBase]);
+  }, [addr, isT]);
 
   if (screen === "select") {
     return <ModeSelect onSelect={(m) => setScreen(m)} />;
